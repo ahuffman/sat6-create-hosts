@@ -1,0 +1,28 @@
+---
+sat6_hosts: []
+sat6_fqdn: ""
+sat6_user: ""
+sat6_pass: ""
+sat6_organization: ""
+sat6_fail_on_existing: False
+
+#Example provision on compute resource:
+# sat6_hosts:
+#   - name: "test-server"
+#     location: "my location name"
+#     domain: "mydomain.com" #optional if you want host group default
+#     host_group: "RHEL7"
+#     ipv4: "192.168.122.140" #optional if using ipam/dhcp on the host group subnet
+#     comment: "A new server to test provisioning with." #optional
+#     compute_profile: "2-Medium" #optional if you want to use the host group default
+#     compute_resource: "my compute resource name"
+
+#Example provision on baremetal:
+# sat6_hosts:
+#   - name: "test-baremetal-server"
+#     location: "my location name"
+#     domain: "mydomain.com" #optional if you want host group default
+#     host_group: "RHEL7"
+#     ipv4: "192.168.122.140" #optional if using ipam/dhcp on the host group subnet
+#     comment: "A new baremetal server to test provisioning with." #optional
+#     mac: "01:21:AB:CD:EF:GH"

@@ -1,0 +1,36 @@
+{"host": {
+  "name": "{{ host_fqdn }}",
+  "organization_id": "{{ organization_id }}",
+  "location_id": "{{ location_id }}",
+{% if host.ipv4 is defined %}
+  "ip": "{{ host.ipv4 }}",
+{% endif %}
+  "mac": "{{ host.mac }}",
+{% if domain_id != "" %}
+  "domain_id": "{{ domain_id }}",
+{% endif %}
+{% if subnet_id != "" %}
+  "subnet_id": "{{ subnet_id }}",
+{% endif %}
+{% if partition_table_id != "" %}
+  "ptable_id": "{{ partition_table_id }}",
+{% endif %}
+  "hostgroup_id": "{{ host_grp_id }}",
+{% if host.parameters is defined %}
+{% if host.parameters | length > 0 %}
+  "host_parameters_attributes": [
+{% for param in host.parameters %}
+    {
+    "name": "{{ param.name }}", "value": "{{ param.value }}"
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
+  ],
+{% endif %}
+{% endif %}
+  "comment": "{{ host.comment | default('') }}",
+  "build": "true",
+  "provision_method": "build",
+  "managed": "true",
+  "enabled": "true"
+  }
+}
