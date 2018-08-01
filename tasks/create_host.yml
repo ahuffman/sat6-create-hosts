@@ -1,0 +1,402 @@
+---
+- name: "Clear facts"
+  set_fact:
+    location_id: ""
+    host_grp_id: ""
+    compute_resource_id: ""
+    compute_profile_id: ""
+    host_fqdn: ""
+    host_exists: ""
+    partition_table_id: ""
+    subnet_id: ""
+    domain_id: ""
+    failed_host: []
+    created_host: []
+
+- name: "Obtain Satellite6 Host Group ID"
+  block:
+    - include_role:
+        name: "ahuffman.api"
+      vars:
+        api_task_name: "Obtain Satellite6 Host Group ID"
+        api_url_path: "api/hostgroups"
+        api_body: "{\"search\": \"{{ host.host_group }}\"}"
+        api_register_var: "host_grp_qry"
+
+    - debug:
+        var: "host_grp_qry.json.results[0]"
+        verbosity: "1"
+
+    - debug:
+        var: "host_grp_qry.json.results[0].ancestry"
+        verbosity: "1"
+
+    - name: "Set Satellite6 Host Group ID"
+      set_fact:
+        host_grp_id: "{{ host_grp_qry.json.results[0].id }}"
+      when: "host_grp_qry.json.results[0].name == host.host_group"
+
+    - debug:
+        var: "host_grp_id"
+        verbosity: "1"
+  tags:
+    - "host_group_id"
+
+# To resolve case where the domain/domain_id shows as null in a nested host group
+- name: "Obtain Inherited Satellite6 Host Group Data"
+  block:
+    - include_role:
+        name: "ahuffman.api"
+      vars:
+        api_task_name: "Obtain Satellite6 Inherited Host Group ID"
+        api_url_path: "api/hostgroups/{{ host_grp_qry.json.results[0].ancestry }}"
+        api_register_var: "inherited_host_grp_qry"
+
+    - debug:
+        var: "inherited_host_grp_qry.json"
+        verbosity: "1"
+
+    - name: "Set inherited Host Group facts"
+      block:
+        - name: "Set inherited Satellite6 Domain ID"
+          set_fact:
+            domain_id: "{{ inherited_host_grp_qry.json.domain_id }}"
+          when:
+            - "not host_grp_qry.json.results[0].domain_id"
+
+        - debug:
+            var: "domain_id"
+            verbosity: "1"
+      tags:
+        - "inherited_host_group_facts"
+  when:
+    - "host_grp_qry.json.results[0].ancestry is defined"
+    - "host_grp_qry.json.results[0].ancestry"
+  tags:
+    - "inherited_host_group_facts"
+
+- name: "Check if Satellite6 host exists"
+  block:
+    - name: "Set Satellite6 host fqdn | Domain Default from Host Group"
+      set_fact:
+        host_fqdn: "{{ host.name }}.{{ host_grp_qry.json.results[0].domain_name }}"
+      when:
+        - "host.domain | default('') == ''"
+        - "host_grp_qry.json.results[0].domain_name"
+
+    - name: "Set Satellite6 host fqdn | Domain Default from Parent Host Group"
+      set_fact:
+        host_fqdn: "{{ host.name }}.{{ inherited_host_grp_qry.json.domain_name }}"
+      when:
+        - "host.domain | default('') == ''"
+        - "not host_grp_qry.json.results[0].domain_name"
+
+    - name: "Set Satellite6 host fqdn | Domain Specified"
+      set_fact:
+        host_fqdn: "{{ host.name }}.{{ host.domain }}"
+      when: "host.domain | default('') != ''"
+
+    - debug:
+        var: "host_fqdn"
+        verbosity: "1"
+
+    - include_role:
+        name: "ahuffman.api"
+      vars:
+        api_task_name: "Check if Satellite6 host {{ host_fqdn }} exists"
+        api_url_path: "api/hosts"
+        api_body: "{\"search\": \"{{ host_fqdn }}\"}"
+        api_register_var: "host_qry"
+
+    - debug:
+        var: "host_qry.json.results[0]"
+        verbosity: "1"
+
+    - name: "Set Satellite6 Host {{ host_fqdn }} Exists | True"
+      set_fact:
+        host_exists: True
+      when:
+        - "host_qry.json.results | length > 0"
+        - "host_qry.json.results[0].name == host_fqdn"
+
+    - name: "Set Satellite6 Host {{ host_fqdn }} Exists | False"
+      set_fact:
+        host_exists: False
+      when:
+        - "host_qry.json.results | length < 1"
+
+    - debug:
+        var: "host_exists"
+        verbosity: "1"
+  tags:
+    - "host_exists_check"
+
+- name: "Obtain Satellite6 Domain ID"
+  block:
+    - include_role:
+        name: "ahuffman.api"
+      vars:
+        api_task_name: "Obtain Satellite6 Domain ID"
+        api_url_path: "api/domains"
+        api_body: "{\"search\": \"{{ host.domain }}\"}"
+        api_register_var: "domain_qry"
+
+    - debug:
+        var: "domain_qry.json.results[0]"
+        verbosity: "1"
+
+    - name: "Set Satellite6 Domain ID"
+      set_fact:
+        domain_id: "{{ domain_qry.json.results[0].id }}"
+      when: "domain_qry.json.results[0].name == host.domain"
+
+    - debug:
+        var: "domain_id"
+        verbosity: "1"
+  when:
+    - "not host_exists"
+    - "host.domain is defined"
+
+- name: "Obtain Satellite6 Location ID"
+  block:
+    - include_role:
+        name: "ahuffman.api"
+      vars:
+        api_task_name: "Obtain Satellite6 Location ID"
+        api_url_path: "api/locations"
+        api_body: "{\"search\": \"{{ host.location }}\"}"
+        api_register_var: "loc_qry"
+
+    - debug:
+        var: "loc_qry.json.results[0]"
+        verbosity: "1"
+
+    - name: "Set Satellite6 Location ID"
+      set_fact:
+        location_id: "{{ loc_qry.json.results[0].id }}"
+      when: "loc_qry.json.results[0].name == host.location"
+
+    - debug:
+        var: "location_id"
+        verbosity: "1"
+  when: "not host_exists"
+  tags:
+    - "location_id"
+
+- name: "Obtain Satellite6 Compute Resource ID"
+  block:
+    - include_role:
+        name: "ahuffman.api"
+      vars:
+        api_task_name: "Obtain Satellite6 Compute Resource ID"
+        api_url_path: "api/compute_resources"
+        api_body: "{\"search\": \"{{ host.compute_resource }}\"}"
+        api_register_var: "compute_resource_qry"
+
+    - debug:
+        var: "compute_resource_qry.json.results[0]"
+        verbosity: "1"
+
+    - name: Set Satellite6 Compute Resource ID
+      set_fact:
+        compute_resource_id: "{{ compute_resource_qry.json.results[0].id }}"
+      when: "compute_resource_qry.json.results[0].name == host.compute_resource"
+
+    - debug:
+        var: "compute_resource_id"
+        verbosity: "1"
+  when:
+    - "not host_exists"
+    - "host.compute_resource is defined"
+    - "host.mac is undefined"
+  tags:
+    - "compute_resource_id"
+
+- name: "Obtain Satellite6 Compute Profile ID | Specified"
+  block:
+    - include_role:
+        name: "ahuffman.api"
+      vars:
+        api_task_name: "Obtain Satellite6 Compute Profile ID"
+        api_url_path: "api/compute_profiles"
+        api_body: "{\"search\": \"{{ host.compute_profile | truncate(10, True, '') }}\"}"
+        api_register_var: "compute_profile_qry"
+
+    - debug:
+        var: "compute_profile_qry.json.results[0]"
+        verbosity: "1"
+
+    - name: "Set Satellite6 Compute Profile ID | Specified"
+      set_fact:
+        compute_profile_id: "{{ compute_profile_qry.json.results[0].id }}"
+      when: "compute_profile_qry.json.results[0].name == host.compute_profile"
+
+    - debug:
+        var: "compute_profile_id"
+        verbosity: "1"
+  when:
+    - "not host_exists"
+    - "host.compute_profile is defined"
+  tags:
+    - "compute_profile_id"
+
+- name: "Obtain Satellite6 Compute Profile ID | Default from Host Group"
+  block:
+    - name: "Set Satellite6 Compute Profile ID | Default from Host Group"
+      set_fact:
+        compute_profile_id: "{{ host_grp_qry.json.results[0].compute_profile_id }}"
+      when: "host_grp_qry.json.results[0].name == host.host_group"
+
+    - debug:
+        var: "compute_profile_id.json.results[0]"
+        verbosity: "1"
+  when:
+    - "not host_exists"
+    - "host.compute_profile is undefined"
+    - "host.mac is undefined"
+  tags:
+    - "compute_profile_id"
+
+- name: "Obtain Satellite6 Subnet ID"
+  block:
+    - include_role:
+        name: "ahuffman.api"
+      vars:
+        api_task_name: "Obtain Satellite6 Subnet ID"
+        api_url_path: "api/subnets"
+        api_body: "{\"search\": \"{{ host.subnet }}\"}"
+        api_register_var: "subnet_qry"
+
+    - debug:
+        var: "subnet_qry.json.results[0]"
+        verbosity: "1"
+
+    - name: "Set Satellite6 Subnet ID"
+      set_fact:
+        subnet_id: "{{ subnet_qry.json.results[0].id }}"
+      when: "subnet_qry.json.results[0].name == host.subnet"
+
+    - debug:
+        var: "subnet_id"
+        verbosity: "1"
+  when:
+    - "not host_exists"
+    - "host.subnet is defined"
+  tags:
+    - "partition_table_id"
+
+- name: "Obtain Satellite6 partition table ID"
+  block:
+    - include_role:
+        name: "ahuffman.api"
+      vars:
+        api_task_name: "Obtain Satellite6 partition table ID"
+        api_url_path: "api/ptables"
+        api_body: "{\"search\": \"{{ host.partition_table }}\"}"
+        api_register_var: "partition_table_qry"
+
+    - debug:
+        var: "partition_table_qry.json.results[0]"
+        verbosity: "1"
+
+    - name: Set Satellite6 partition table ID
+      set_fact:
+        partition_table_id: "{{ partition_table_qry.json.results[0].id }}"
+      when: "partition_table_qry.json.results[0].name == host.partition_table"
+
+    - debug:
+        var: "partition_table_id"
+        verbosity: "1"
+  when:
+    - "not host_exists"
+    - "host.partition_table is defined"
+  tags:
+    - "partition_table_id"
+
+- name: "Create new Satellite 6 host"
+  block:
+    - name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
+      block:
+        - include_role:
+            name: "ahuffman.api"
+          vars:
+            api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
+            api_url_path: "api/hosts"
+            api_body: "{{ lookup('template', 'new_host_virtual.json.j2') }}"
+            api_register_var: "create_host_results"
+            api_method: "POST"
+            api_status_code: "201"
+
+        - debug:
+            var: "create_host_results"
+            verbosity: "1"
+
+        - include_role:
+            name: "ahuffman.api"
+          vars:
+            api_task_name: "Power on Satellite6 host {{ host_fqdn }}"
+            api_url_path: "api/hosts/{{ create_host_results.json.id }}/power"
+            api_body: "{\"power_action\": \"start\"}"
+            api_register_var: "power_result"
+            api_method: "PUT"
+
+        - debug:
+            var: "power_result"
+            verbosity: "1"
+
+        - set_fact:
+            created_host: ["{{ host_fqdn }}"]
+          when:
+            - "create_host_results.status == 201"
+            - "power_result.status == 200"
+      when:
+        - "compute_profile_id != ''"
+        - "compute_resource_id != ''"
+        - "host.mac is undefined"
+
+    - name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
+      block:
+        - include_role:
+            name: "ahuffman.api"
+          vars:
+            api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
+            api_url_path: "api/hosts"
+            api_body: "{{ lookup('template', 'new_host_physical.json.j2') }}"
+            api_register_var: "create_host_results"
+            api_method: "POST"
+            api_status_code: "201"
+
+        - debug:
+            var: "create_host_results"
+            verbosity: "1"
+
+        - set_fact:
+            created_host: ["{{ host_fqdn }}"]
+          when: "create_host_results.status == 201"
+      when:
+        - "host.mac is defined"
+        - "host.compute_profile is undefined"
+        - "host.compute_resource is undefined"
+
+    - set_fact:
+        created_hosts: "{{ created_hosts | union(created_host) }}"
+      when: "created_host | length > 0"
+  when: "not host_exists"
+
+- name: "Handle existing Satellite6 hosts"
+  block:
+    - debug:
+        msg: "{{ host_fqdn }} already exists.  Not attempting to create."
+
+    - set_fact:
+        failed_host: ["{{ host_fqdn }}"]
+
+    - set_fact:
+        failed_hosts: "{{ failed_hosts | union(failed_host) }}"
+        fail_playbook: True
+      when: "sat6_fail_on_existing"
+
+    - set_fact:
+        failed_hosts: "{{ failed_hosts | union(failed_host) }}"
+      when: "not sat6_fail_on_existing"
+  when: "host_exists"

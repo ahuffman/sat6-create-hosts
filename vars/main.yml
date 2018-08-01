@@ -1,0 +1,5 @@
+---
+#Pass default variables to ahuffman.api role
+api_user: "{{ sat6_user }}"
+api_pass: "{{ sat6_pass }}"
+api_base_url: "https://{{ sat6_fqdn }}"
