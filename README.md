@@ -62,7 +62,7 @@ To view full debugging output increase the verbosity to 1 (Verbose) in Ansible T
       tasks:
         - name: Provision Satellite 6 Hosts
           include_role:
-            - name: "sat6-create-hosts"
+            - name: "ahuffman.sat6_create_hosts"
           vars:
             sat6_fqdn: "mysat6server.mydomain.com"
             sat6_user: ""
