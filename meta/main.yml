@@ -1,6 +1,7 @@
 galaxy_info:
   author: "Andrew J. Huffman"
-  description: "An Ansible role to create new virtual and bare-metal hosts in Satellite 6.x. v2 of Satellite6 API is required."
+  description: "An Ansible role to create new virtual and bare-metal hosts in Satellite 6.x."
+  company: "Red Hat"
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
@@ -42,6 +43,22 @@ galaxy_info:
   #   - 1.0
   #   - 7
   #   - 99.99
+  platforms:
+    - name: "EL"
+      versions:
+        - "all"
+    - name: "Fedora"
+      versions:
+        - "all"
+    - name: "Ubuntu"
+      versions:
+        - "all"
+    - name: "Amazon"
+      versions:
+        - "all"
+    - name: "Debian"
+      versions:
+        - "all"
 
   galaxy_tags:
     - "system"
