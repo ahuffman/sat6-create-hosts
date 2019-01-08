@@ -81,20 +81,20 @@
       set_fact:
         host_fqdn: "{{ host.name }}.{{ host_grp_qry.json.results[0].domain_name }}"
       when:
-        - "host.domain | default('') == ''"
+        - "host.domain | default('')"
         - "host_grp_qry.json.results[0].domain_name"
 
     - name: "Set Satellite6 host fqdn | Domain Default from Parent Host Group"
       set_fact:
         host_fqdn: "{{ host.name }}.{{ inherited_host_grp_qry.json.domain_name }}"
       when:
-        - "host.domain | default('') == ''"
+        - "host.domain | default('')"
         - "not host_grp_qry.json.results[0].domain_name"
 
     - name: "Set Satellite6 host fqdn | Domain Specified"
       set_fact:
         host_fqdn: "{{ host.name }}.{{ host.domain }}"
-      when: "host.domain | default('') != ''"
+      when: "host.domain | default('')"
 
     - debug:
         var: "host_fqdn"
@@ -350,8 +350,8 @@
             - "create_host_results.status == 201"
             - "power_result.status == 200"
       when:
-        - "compute_profile_id != ''"
-        - "compute_resource_id != ''"
+        - "compute_profile_id"
+        - "compute_resource_id"
         - "host.mac is undefined"
 
     - name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
@@ -378,7 +378,8 @@
         - "host.compute_profile is undefined"
         - "host.compute_resource is undefined"
 
-    - set_fact:
+    - name: "Build list of Created Hosts"
+      set_fact:
         created_hosts: "{{ created_hosts | union(created_host) }}"
       when: "created_host | length > 0"
   when: "not host_exists"
@@ -388,15 +389,18 @@
     - debug:
         msg: "{{ host_fqdn }} already exists.  Not attempting to create."
 
-    - set_fact:
+    - name: "Failed host"
+      set_fact:
         failed_host: ["{{ host_fqdn }}"]
 
-    - set_fact:
+    - name: "Build list of failed hosts | fail"
+      set_fact:
         failed_hosts: "{{ failed_hosts | union(failed_host) }}"
         fail_playbook: True
       when: "sat6_fail_on_existing"
 
-    - set_fact:
+    - name: "Build list of failed hosts | no fail"
+      set_fact:
         failed_hosts: "{{ failed_hosts | union(failed_host) }}"
       when: "not sat6_fail_on_existing"
   when: "host_exists"

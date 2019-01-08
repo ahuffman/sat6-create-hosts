@@ -42,7 +42,8 @@
   tags:
     - "organization_id"
 
-- set_fact:
+- name: "Initialize lists"
+  set_fact:
     failed_hosts: []
     created_hosts: []
 
@@ -59,7 +60,8 @@
     msg: "No hosts were created."
   when: "created_hosts | length < 1"
 
-- fail:
+- name: "Playbook fail"
+  fail:
     msg:
       - "List of hosts to provision missing."
       - "Variable sat6_hosts list empty."
@@ -72,7 +74,8 @@
   when: "created_hosts | length > 0"
 
 # when we want to fail the playbook on existing sat6 hosts
-- fail:
+- name: "Playbook fail when host exists"
+  fail:
     msg:
       - "Host(s) already exist in Satellite6:"
       - "{{ failed_hosts }}"
