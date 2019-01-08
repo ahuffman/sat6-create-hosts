@@ -56,16 +56,17 @@ To view full debugging output increase the verbosity to 1 (Verbose) in Ansible T
 
 ```yaml
     ---
-    - hosts: "localhost"
+    - name: "ahuffman.sat6_create_hosts Example Playbook"
+      hosts: "localhost"
       vars_files:
         - "vars/myvaultedsecrets.yml"
       tasks:
-        - name: Provision Satellite 6 Hosts
+        - name: "Provision Satellite 6 Hosts"
           include_role:
-            - name: "ahuffman.sat6_create_hosts"
+            name: "ahuffman.sat6_create_hosts"
           vars:
             sat6_fqdn: "mysat6server.mydomain.com"
-            sat6_user: ""
+            sat6_user: "mysat6admin"
             #sat6_pass: "this is set in the vars/myvaultedsecrets.yml file"
             sat6_organization: "my organization"
             sat6_fail_on_existing: True
