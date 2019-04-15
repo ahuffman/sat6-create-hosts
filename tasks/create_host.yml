@@ -20,21 +20,17 @@
       vars:
         api_task_name: "Obtain Satellite6 Host Group ID"
         api_url_path: "api/hostgroups"
-        api_body: "{\"search\": \"{{ host.host_group }}\"}"
+        api_body: "{\"search\": \"title={{ host.host_group }}\"}"
         api_register_var: "host_grp_qry"
 
     - debug:
         var: "host_grp_qry.json.results[0]"
         verbosity: "1"
 
-    - debug:
-        var: "host_grp_qry.json.results[0].ancestry"
-        verbosity: "1"
-
     - name: "Set Satellite6 Host Group ID"
       set_fact:
         host_grp_id: "{{ host_grp_qry.json.results[0].id }}"
-      when: "host_grp_qry.json.results[0].name == host.host_group"
+      when: "host_grp_qry.json.results[0].title == host.host_group"
 
     - debug:
         var: "host_grp_id"
@@ -42,54 +38,14 @@
   tags:
     - "host_group_id"
 
-# To resolve case where the domain/domain_id shows as null in a nested host group
-- name: "Obtain Inherited Satellite6 Host Group Data"
-  block:
-    - include_role:
-        name: "ahuffman.api"
-      vars:
-        api_task_name: "Obtain Satellite6 Inherited Host Group ID"
-        api_url_path: "api/hostgroups/{{ host_grp_qry.json.results[0].ancestry }}"
-        api_register_var: "inherited_host_grp_qry"
-
-    - debug:
-        var: "inherited_host_grp_qry.json"
-        verbosity: "1"
-
-    - name: "Set inherited Host Group facts"
-      block:
-        - name: "Set inherited Satellite6 Domain ID"
-          set_fact:
-            domain_id: "{{ inherited_host_grp_qry.json.domain_id }}"
-          when:
-            - "not host_grp_qry.json.results[0].domain_id"
-
-        - debug:
-            var: "domain_id"
-            verbosity: "1"
-      tags:
-        - "inherited_host_group_facts"
-  when:
-    - "host_grp_qry.json.results[0].ancestry is defined"
-    - "host_grp_qry.json.results[0].ancestry"
-  tags:
-    - "inherited_host_group_facts"
-
 - name: "Check if Satellite6 host exists"
   block:
     - name: "Set Satellite6 host fqdn | Domain Default from Host Group"
       set_fact:
         host_fqdn: "{{ host.name }}.{{ host_grp_qry.json.results[0].domain_name }}"
       when:
-        - "host.domain | default('')"
+        - "not host.domain | default('')"
         - "host_grp_qry.json.results[0].domain_name"
-
-    - name: "Set Satellite6 host fqdn | Domain Default from Parent Host Group"
-      set_fact:
-        host_fqdn: "{{ host.name }}.{{ inherited_host_grp_qry.json.domain_name }}"
-      when:
-        - "host.domain | default('')"
-        - "not host_grp_qry.json.results[0].domain_name"
 
     - name: "Set Satellite6 host fqdn | Domain Specified"
       set_fact:
@@ -105,7 +61,7 @@
       vars:
         api_task_name: "Check if Satellite6 host {{ host_fqdn }} exists"
         api_url_path: "api/hosts"
-        api_body: "{\"search\": \"{{ host_fqdn }}\"}"
+        api_body: "{\"search\": \"name={{ host_fqdn }}\"}"
         api_register_var: "host_qry"
 
     - debug:
@@ -138,7 +94,7 @@
       vars:
         api_task_name: "Obtain Satellite6 Domain ID"
         api_url_path: "api/domains"
-        api_body: "{\"search\": \"{{ host.domain }}\"}"
+        api_body: "{\"search\": \"name={{ host.domain }}\"}"
         api_register_var: "domain_qry"
 
     - debug:
@@ -164,7 +120,7 @@
       vars:
         api_task_name: "Obtain Satellite6 Location ID"
         api_url_path: "api/locations"
-        api_body: "{\"search\": \"{{ host.location }}\"}"
+        api_body: "{\"search\": \"name={{ host.location }}\"}"
         api_register_var: "loc_qry"
 
     - debug:
@@ -190,7 +146,7 @@
       vars:
         api_task_name: "Obtain Satellite6 Compute Resource ID"
         api_url_path: "api/compute_resources"
-        api_body: "{\"search\": \"{{ host.compute_resource }}\"}"
+        api_body: "{\"search\": \"name={{ host.compute_resource }}\"}"
         api_register_var: "compute_resource_qry"
 
     - debug:
@@ -219,7 +175,7 @@
       vars:
         api_task_name: "Obtain Satellite6 Compute Profile ID"
         api_url_path: "api/compute_profiles"
-        api_body: "{\"search\": \"{{ host.compute_profile | truncate(10, True, '') }}\"}"
+        api_body: "{\"search\": \"name={{ host.compute_profile | truncate(10, True, '') }}\"}"
         api_register_var: "compute_profile_qry"
 
     - debug:
@@ -264,7 +220,7 @@
       vars:
         api_task_name: "Obtain Satellite6 Subnet ID"
         api_url_path: "api/subnets"
-        api_body: "{\"search\": \"{{ host.subnet }}\"}"
+        api_body: "{\"search\": \"name={{ host.subnet }}\"}"
         api_register_var: "subnet_qry"
 
     - debug:
@@ -292,7 +248,7 @@
       vars:
         api_task_name: "Obtain Satellite6 partition table ID"
         api_url_path: "api/ptables"
-        api_body: "{\"search\": \"{{ host.partition_table }}\"}"
+        api_body: "{\"search\": \"name={{ host.partition_table }}\"}"
         api_register_var: "partition_table_qry"
 
     - debug:
