@@ -20,7 +20,7 @@
       vars:
         api_task_name: "Obtain Satellite6 Host Group ID"
         api_url_path: "api/hostgroups"
-        api_body: "{\"search\": \"?title={{ host.host_group }}\"}"
+        api_body: "{\"search\": \"title={{ host.host_group }}\"}"
         api_register_var: "host_grp_qry"
 
     - debug:
