@@ -20,7 +20,7 @@
       vars:
         api_task_name: "Obtain Satellite6 Host Group ID"
         api_url_path: "api/hostgroups"
-        api_body: "{\"search\": \"{{ host.host_group }}\"}"
+        api_body: "{\"search\": \"?title={{ host.host_group }}\"}"
         api_register_var: "host_grp_qry"
 
     - debug:
@@ -31,10 +31,11 @@
         var: "host_grp_qry.json.results[0].ancestry"
         verbosity: "1"
 
-    - name: "Set Satellite6 Host Group ID"
-      set_fact:
-        host_grp_id: "{{ host_grp_qry.json.results[0].id }}"
-      when: "host_grp_qry.json.results[0].name == host.host_group"
+    # - name: "Set Satellite6 Host Group ID"
+    #   set_fact:
+    #     host_grp_id: "{{ host_grp_qry.json.results[0].id }}"
+    #   # when: "host_grp_qry.json.results[0].name == host.host_group"
+    #   when: "host_grp_qry.json.results"
 
     - debug:
         var: "host_grp_id"
