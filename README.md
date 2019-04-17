@@ -20,7 +20,7 @@ Fields you can utilize for either bare-metal or virtual host creation.
 |name|yes|Hostname of the host to create|string|
 |comment|no|A comment that will appear in the host's additional information.  A short description of what the host is for.|string|
 |domain|no|Name of the Satellite6 domain to create the host with. Not required if you wish to inherit the host group's default domain, otherwise this overrides the host group default.|string|
-|host_group|yes|Name of the Satellite6 Host Group to create the new host with. **If the Host Group is nested, do not include the `parent host-group name\nested host group name` or the Role will fail.  You must use just the nested Host Group name only.**|string|
+|host_group|yes|Name of the Satellite6 Host Group to create the new host with.  **If nesting Host Groups, this would be the Host Group name in the form `hostgroup1/hostgroup2/hostgroup3`, also known as the `title` in the API.|string|
 |ipv4|no|IPv4 address to assign to the host.  Not required if the host group is configured to suggest an IPv4 address via ipam or dhcp.|string|
 |location|yes|Name of the Satellite6 location where you will be deploying the host.|string|
 |partition_table|no|Name of the Satellite6 partition table to create the host with.  Not required if you wish to inherit the host group's default partition table.|string|
