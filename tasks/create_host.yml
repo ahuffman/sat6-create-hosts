@@ -24,7 +24,7 @@
         api_register_var: "host_grp_qry"
 
     - debug:
-        var: "host_grp_qry.json.results"
+        var: "host_grp_qry.json.results[0]"
         verbosity: "1"
 
     - debug:
