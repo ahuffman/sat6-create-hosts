@@ -335,8 +335,6 @@
           when:
             - "create_host_results.status == 201"
       when:
-        - "compute_profile_id"
-        - "compute_resource_id"
         - "host.mac is undefined"
         - "host.register_only | default(False)"
 
