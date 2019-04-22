@@ -309,6 +309,35 @@
         - "compute_profile_id"
         - "compute_resource_id"
         - "host.mac is undefined"
+        - "not register_only | default(False)"
+
+- name: "Create new Satellite 6 host"
+  block:
+    - name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
+      block:
+        - include_role:
+            name: "ahuffman.api"
+          vars:
+            api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
+            api_url_path: "api/hosts"
+            api_body: "{{ lookup('template', 'new_host_virtual_register_only.json.j2') }}"
+            api_register_var: "create_host_results"
+            api_method: "POST"
+            api_status_code: "201"
+
+        - debug:
+            var: "create_host_results"
+            verbosity: "1"
+
+        - set_fact:
+            created_host: ["{{ host_fqdn }}"]
+          when:
+            - "create_host_results.status == 201"
+      when:
+        - "compute_profile_id"
+        - "compute_resource_id"
+        - "host.mac is undefined"
+        - "register_only | default(False)"
 
     - name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
       block:
@@ -333,6 +362,32 @@
         - "host.mac is defined"
         - "host.compute_profile is undefined"
         - "host.compute_resource is undefined"
+        - "not host.register_only | default(False)"
+
+    - name: "Create new Satellite 6 host {{ host_fqdn }} | Physical (register only)"
+      block:
+        - include_role:
+            name: "ahuffman.api"
+          vars:
+            api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
+            api_url_path: "api/hosts"
+            api_body: "{{ lookup('template', 'new_host_physical_register_only.json.j2') }}"
+            api_register_var: "create_host_results"
+            api_method: "POST"
+            api_status_code: "201"
+
+        - debug:
+            var: "create_host_results"
+            verbosity: "1"
+
+        - set_fact:
+            created_host: ["{{ host_fqdn }}"]
+          when: "create_host_results.status == 201"
+      when:
+        - "host.mac is defined"
+        - "host.compute_profile is undefined"
+        - "host.compute_resource is undefined"
+        - "host.register_only | default(False)"
 
     - name: "Build list of Created Hosts"
       set_fact:

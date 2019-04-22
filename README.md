@@ -26,6 +26,7 @@ Fields you can utilize for either bare-metal or virtual host creation.
 |partition_table|no|Name of the Satellite6 partition table to create the host with.  Not required if you wish to inherit the host group's default partition table.|string|
 |subnet|no|Name of the Satellite6 subnet to create the host with.  Not required if you wish to inherit the host group's default subnet.|string|
 |parameters|no|List of additional Satellite6 host specific parameters you would like to set on the host.  This is useful when doing post provisioning tasks and wish to use conditionals based off of these values, etc.|list of dictionaries|
+|register_only|no|Whether to only create the host entry in Satellite6 VS. actually powering it on and provisioning it  (Defaults to False).  Functionality added for other use-cases than provisioning (i.e. client registration with location specified)|boolean|
 
 
 ## `sat6_hosts` Dictionary Fields - Virtual
