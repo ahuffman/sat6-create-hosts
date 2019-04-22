@@ -307,8 +307,8 @@
             - "create_host_results.status == 201"
             - "power_result.status == 200"
       when:
-        - "compute_profile_id"
-        - "compute_resource_id"
+        - "compute_profile_id is defined"
+        - "compute_resource_id is defined"
         - "host.mac is undefined"
         - "not host.register_only | default(False)"
 
