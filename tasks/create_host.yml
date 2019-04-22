@@ -313,7 +313,7 @@
 
 - name: "Create new Satellite 6 host"
   block:
-    - name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
+    - name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual (register_only)"
       block:
         - include_role:
             name: "ahuffman.api"
