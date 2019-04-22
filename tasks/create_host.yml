@@ -210,6 +210,7 @@
     - "not host_exists"
     - "host.compute_profile is undefined"
     - "host.mac is undefined"
+    - "not host.register_only | default(False)"
   tags:
     - "compute_profile_id"
 
