@@ -309,7 +309,7 @@
         - "compute_profile_id"
         - "compute_resource_id"
         - "host.mac is undefined"
-        - "not register_only | default(False)"
+        - "not host.register_only | default(False)"
 
 - name: "Create new Satellite 6 host"
   block:
@@ -337,7 +337,7 @@
         - "compute_profile_id"
         - "compute_resource_id"
         - "host.mac is undefined"
-        - "register_only | default(False)"
+        - "host.register_only | default(False)"
 
     - name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
       block:
