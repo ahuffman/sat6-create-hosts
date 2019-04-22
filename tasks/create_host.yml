@@ -139,7 +139,7 @@
   tags:
     - "location_id"
 
-- name: "Obtain Satellite6 Compute Resource ID"
+- name: "Obtain Satellite6 Compute Resource ID | Specified"
   block:
     - include_role:
         name: "ahuffman.api"
