@@ -2,7 +2,6 @@
 - name: "Ensure we have the Satellite Server's CA for validating authentication"
   stat:
     path: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
-  delegate_to: "localhost"
   register: "ca_cert"
 
 - name: "Obtain Satellite Server's CA for validating authentication"
