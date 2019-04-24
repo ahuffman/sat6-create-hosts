@@ -321,8 +321,6 @@
         - "host.mac is undefined"
         - "not host.register_only | default(False)"
 
-- name: "Create new Satellite 6 host"
-  block:
     - name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual (register_only)"
       block:
         - include_role:
@@ -349,8 +347,6 @@
         - "domain_id is defined"
         - "host.register_only | default(False)"
 
-- name: "Update existing Satellite 6 host"
-  block:
     - name: "Update existing Satellite 6 host {{ host_fqdn }} | Virtual"
       block:
         - include_role:
