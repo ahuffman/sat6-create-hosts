@@ -480,7 +480,7 @@
   when: (not host_exists) or
         (host_exists and host.force_host_update | default(False) and host.register_only | default(False) and not sat6_fail_on_existing)
 
-- name: "Handle existing Satellite6 hosts"
+- name: "Handle existing Satellite6 hosts | Fail on existing"
   block:
     - debug:
         msg: "{{ host_fqdn }} already exists.  Not attempting to create."
@@ -494,25 +494,35 @@
         failed_hosts: "{{ failed_hosts | union(failed_host) }}"
         fail_playbook: True
       when: "sat6_fail_on_existing"
-
-    - name: "Build list of failed hosts | no fail"
-      set_fact:
-        failed_hosts: "{{ failed_hosts | union(failed_host) }}"
-      when: "not sat6_fail_on_existing"
   when:
     - "host_exists"
     - "sat6_fail_on_existing"
     - "not host.force_host_update | default(False)"
     - "not host.register_only | default(False)"
 
-- name: "Handle existing Satellite6 hosts"
+- name: "Handle existing Satellite6 hosts | No fail"
   block:
+    - debug:
+        msg: "{{ host_fqdn }} already exists.  Not attempting to create."
+      when: "not host.force_host_update"
+
+    - name: "Failed host"
+      set_fact:
+        failed_host: ["{{ host_fqdn }}"]
+      when: "not host.force_host_update"
+
+    - name: "Build list of failed hosts | no fail"
+      set_fact:
+        failed_hosts: "{{ failed_hosts | union(failed_host) }}"
+      when: "not host.force_host_update"
+
     - debug:
         msg:
           - "{{ host_fqdn }} already exists.  Not attempting to create."
           - "Updated {{ host_fqdn }}"
+        when:
+          - "host.force_host_update | default(False)"
+          - "host.register_only | default(False)"
   when:
     - "host_exists"
-    - "host.force_host_update | default(False)"
-    - "host.register_only | default(False)"
     - "not sat6_fail_on_existing"
