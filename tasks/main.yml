@@ -99,5 +99,5 @@
       - "Host(s) already existed and were updated in Satellite6:"
       - "{{ updated_hosts }}"
   when:
-    - "not sat6_fail_on_existsing"
+    - "not sat6_fail_on_existing"
     - "updated_hosts | length > 0"
