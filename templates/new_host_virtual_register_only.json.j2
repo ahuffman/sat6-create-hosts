@@ -31,7 +31,7 @@
   "compute_profile_id": "{{ compute_profile_id }}",
 {% endif %}
   "build": "false",
-{% if host.manage_host_build | default(False) %}
+{% if host.manage_host | default(False) %}
   "managed": "true",
 {% else %}
   "managed": "false",
