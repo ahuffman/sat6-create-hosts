@@ -95,6 +95,15 @@
     - debug:
         var: "host_exists"
         verbosity: "1"
+
+    - debug:
+        var: "host_id"
+        verbosity: "1"
+      when:
+        - "not sat6_fail_on_existing"
+        - "host.force_host_update | default(False)"
+        - "host.register_only | default(False)"
+        - "host_exists"
   tags:
     - "host_exists_check"
 
