@@ -111,7 +111,7 @@
         var: "domain_id"
         verbosity: "1"
   when: (not host_exists and host.domain is defined) or
-        (host_exists and host.force_host_update | default(False) and host.domain is defined and host.register_only | default(False))
+        (host_exists and host.force_host_update | default(False) and host.domain is defined and host.register_only | default(False) and not sat6_fail_on_existing)
 
 - name: "Obtain Satellite6 Location ID"
   block:
@@ -136,7 +136,7 @@
         var: "location_id"
         verbosity: "1"
   when: (not host_exists) or
-        (host_exists and host.force_host_update | default(False) and host.register_only | default(False))
+        (host_exists and host.force_host_update | default(False) and host.register_only | default(False) and not sat6_fail_on_existing)
   tags:
     - "location_id"
 
@@ -163,7 +163,7 @@
         var: "compute_resource_id"
         verbosity: "1"
   when: (not host_exists and host.compute_resource is defined and host.mac is undefined) or
-        (host_exists and host.force_host_update | default(False) and host.compute_resource is defined and host.mac is undefined and host.register_only | default(False))
+        (host_exists and host.force_host_update | default(False) and host.compute_resource is defined and host.mac is undefined and host.register_only | default(False) and not sat6_fail_on_existing)
   tags:
     - "compute_resource_id"
 
@@ -235,7 +235,7 @@
         var: "subnet_id"
         verbosity: "1"
   when: (not host_exists and host.subnet is defined) or
-        (host_exists and host.force_host_update | default(False) and host.register_only | default(False) and host.subnet is defined)
+        (host_exists and host.force_host_update | default(False) and host.register_only | default(False) and host.subnet is defined and not sat6_fail_on_existing)
   tags:
     - "subnet_id"
 
@@ -262,7 +262,7 @@
         var: "partition_table_id"
         verbosity: "1"
   when: (not host_exists and host.partition_table is defined) or
-        (host_exists and host.force_host_update | default(False) and host.register_only | default(False) and host.partition_table is defined)
+        (host_exists and host.force_host_update | default(False) and host.register_only | default(False) and host.partition_table is defined and not sat6_fail_on_existing)
   tags:
     - "partition_table_id"
 
