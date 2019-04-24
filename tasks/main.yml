@@ -45,6 +45,7 @@
   set_fact:
     failed_hosts: []
     created_hosts: []
+    updated_hosts: []
 
 - name: "Create new Satellite 6 Hosts"
   include_tasks: "create_host.yml"
