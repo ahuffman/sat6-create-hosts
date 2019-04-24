@@ -96,7 +96,36 @@ To view full debugging output increase the verbosity to 1 (Verbose) in Ansible T
                 ipv4: "192.168.122.25"
                 domain: "redhat.com"
                 comment: "Database server"
-                mac: "12:34:56:78:91:23"                
+                mac: "12:34:56:78:91:23"
+              #Register Only(i.e. create only)
+              - name: "host1"
+                host_group: "RHEL7-Virtual"
+                location: "Raleigh"
+                ipv4: "192.168.122.26"
+                domain: "redhat.com"
+                comment: "Pre-registration host entry"
+                register_only: True
+              #Update an existing host (sorry for the lame joke)
+              - name: "my-new-vm"
+                host_group: "RHEL7-Virtual"
+                location: "Armonk"
+                ipv4: "192.168.122.24"
+                comment: "Migrated Q3"
+                domain: "ibm.com"
+                parameters:
+                  - name: "build_type"
+                    value: "ihs"
+                register_only: True #means don't try and provision
+                force_host_update: True #update the host if it exists
+              #Manage host builds (provisioning) on presently unmanaged existing host
+              - name: "someoldserver"
+                host_group: "RHEL7-Physical"
+                mac: "32:34:56:78:91:23"
+                domain: "redhat.com"
+                location: "Raleigh"
+                register_only: True
+                force_host_update: True
+                manage_host: True
 ```
 
 ## License
