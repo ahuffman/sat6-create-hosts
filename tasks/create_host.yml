@@ -335,7 +335,7 @@
         - include_role:
             name: "ahuffman.api"
           vars:
-            api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
+            api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual (register_only)"
             api_url_path: "api/v2/hosts"
             api_body: "{{ lookup('template', 'new_host_virtual_register_only.json.j2') }}"
             api_register_var: "create_host_results"
@@ -417,7 +417,7 @@
         - include_role:
             name: "ahuffman.api"
           vars:
-            api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
+            api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Physical (register only)"
             api_url_path: "api/v2/hosts"
             api_body: "{{ lookup('template', 'new_host_physical_register_only.json.j2') }}"
             api_register_var: "create_host_results"
