@@ -79,12 +79,24 @@
       - "Host(s) already exist in Satellite6:"
       - "{{ failed_hosts }}"
   when:
-    - "fail_playbook | default(False)" #Default ensures we have a boolean value if we don't set fail_playbook
+    - "fail_playbook | default(False)"
     - "sat6_fail_on_existing"
 
 # when we don't want to fail the playbook on existing sat6 hosts
+## Handles where we are using host.force_host_update: False
 - debug:
     msg:
       - "Host(s) already exist in Satellite6:"
       - "{{ failed_hosts }}"
-  when: "not sat6_fail_on_existing"
+  when:
+    - "not sat6_fail_on_existing"
+    - "failed_hosts | length > 0"
+
+## Handles where we are using host.force_host_update: True
+- debug:
+    msg:
+      - "Host(s) already existed and were updated in Satellite6:"
+      - "{{ updated_hosts }}"
+  when:
+    - "not sat6_fail_on_existsing"
+    - "updated_hosts | length > 0"

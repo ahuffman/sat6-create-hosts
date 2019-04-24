@@ -24,8 +24,18 @@
 {% endif %}
 {% endif %}
   "comment": "{{ host.comment | default('') }}",
+{% if compute_resource_id is defined %}
+  "compute_resource_id": "{{ compute_resource_id }}",
+{% endif %}
+{% if compute_profile_id is defined %}
+  "compute_profile_id": "{{ compute_profile_id }}",
+{% endif %}
   "build": "false",
+{% if host.manage_host_build | default(False) %}
+  "managed": "true",
+{% else %}
   "managed": "false",
+{% endif %}
   "enabled": "true"
   }
 }

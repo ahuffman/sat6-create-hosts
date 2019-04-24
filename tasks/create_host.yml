@@ -12,6 +12,7 @@
     domain_id: ""
     failed_host: []
     created_host: []
+    updated_host: []
 
 - name: "Obtain Satellite6 Host Group ID"
   block:
@@ -109,9 +110,8 @@
     - debug:
         var: "domain_id"
         verbosity: "1"
-  when:
-    - "not host_exists"
-    - "host.domain is defined"
+  when: (not host_exists and host.domain is defined) or
+        (host_exists and host.force_host_update | default(False) and host.domain is defined and host.register_only | default(False))
 
 - name: "Obtain Satellite6 Location ID"
   block:
@@ -135,7 +135,8 @@
     - debug:
         var: "location_id"
         verbosity: "1"
-  when: "not host_exists"
+  when: (not host_exists) or
+        (host_exists and host.force_host_update | default(False) and host.register_only | default(False))
   tags:
     - "location_id"
 
@@ -161,10 +162,8 @@
     - debug:
         var: "compute_resource_id"
         verbosity: "1"
-  when:
-    - "not host_exists"
-    - "host.compute_resource is defined"
-    - "host.mac is undefined"
+  when: (not host_exists and host.compute_resource is defined and host.mac is undefined) or
+        (host_exists and host.force_host_update | default(False) and host.compute_resource is defined and host.mac is undefined and host.register_only | default(False))
   tags:
     - "compute_resource_id"
 
@@ -190,9 +189,8 @@
     - debug:
         var: "compute_profile_id"
         verbosity: "1"
-  when:
-    - "not host_exists"
-    - "host.compute_profile is defined"
+  when: (not host_exists and host.compute_profile is defined) or
+        (host_exists and host.force_host_update | default(False) and host.register_only | default(False) and host.compute_profile is defined)
   tags:
     - "compute_profile_id"
 
@@ -210,7 +208,7 @@
     - "not host_exists"
     - "host.compute_profile is undefined"
     - "host.mac is undefined"
-    - "not host.register_only | default(False)"
+    - "not host.register_only | default(False))"
   tags:
     - "compute_profile_id"
 
@@ -236,11 +234,10 @@
     - debug:
         var: "subnet_id"
         verbosity: "1"
-  when:
-    - "not host_exists"
-    - "host.subnet is defined"
+  when: (not host_exists and host.subnet is defined) or
+        (host_exists and host.force_host_update | default(False) and host.register_only | default(False) and host.subnet is defined)
   tags:
-    - "partition_table_id"
+    - "subnet_id"
 
 - name: "Obtain Satellite6 partition table ID"
   block:
@@ -264,12 +261,12 @@
     - debug:
         var: "partition_table_id"
         verbosity: "1"
-  when:
-    - "not host_exists"
-    - "host.partition_table is defined"
+  when: (not host_exists and host.partition_table is defined) or
+        (host_exists and host.force_host_update | default(False) and host.register_only | default(False) and host.partition_table is defined)
   tags:
     - "partition_table_id"
 
+# Virtual Host Creation and Updating
 - name: "Create new Satellite 6 host"
   block:
     - name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
@@ -307,6 +304,7 @@
             - "create_host_results.status == 201"
             - "power_result.status == 200"
       when:
+        - "not host_exists"
         - "compute_profile_id is defined"
         - "compute_resource_id is defined"
         - "domain_id is defined"
@@ -336,10 +334,41 @@
           when:
             - "create_host_results.status == 201"
       when:
+        - "not host_exists"
         - "host.mac is undefined"
         - "domain_id is defined"
         - "host.register_only | default(False)"
 
+- name: "Update existing Satellite 6 host"
+  block:
+    - name: "Update existing Satellite 6 host {{ host_fqdn }} | Virtual"
+      block:
+        - include_role:
+            name: "ahuffman.api"
+          vars:
+            api_task_name: "Update existing Satellite 6 host {{ host_fqdn }} | Virtual"
+            api_url_path: "api/hosts"
+            api_body: "{{ lookup('template', 'new_host_virtual_register_only.json.j2') }}"
+            api_register_var: "update_host_results"
+            api_method: "PUT"
+            api_status_code: "200"
+
+        - debug:
+            var: "update_host_results"
+            verbosity: "1"
+
+        - set_fact:
+            updated_host: ["{{ host_fqdn }}"]
+          when:
+            - "update_host_results.status == 200"
+      when:
+        - "host_exists"
+        - "host.force_host_update | default(False)"
+        - "host.register_only | default(False)"
+        - "host.mac is undefined"
+        - "domain_id is defined"
+
+# Bare-metal Host Creation and Updating
     - name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
       block:
         - include_role:
@@ -360,6 +389,7 @@
             created_host: ["{{ host_fqdn }}"]
           when: "create_host_results.status == 201"
       when:
+        - "not host_exists"
         - "host.mac is defined"
         - "domain_id is defined"
         - "host.compute_profile is undefined"
@@ -386,17 +416,52 @@
             created_host: ["{{ host_fqdn }}"]
           when: "create_host_results.status == 201"
       when:
+        - "not host_exists"
         - "host.mac is defined"
         - "domain_id is defined"
         - "host.compute_profile is undefined"
         - "host.compute_resource is undefined"
         - "host.register_only | default(False)"
 
+    - name: "Update existing Satellite 6 host {{ host_fqdn }} | Physical"
+      block:
+        - include_role:
+            name: "ahuffman.api"
+          vars:
+            api_task_name: "Update existing Satellite 6 host {{ host_fqdn }} | Physical"
+            api_url_path: "api/hosts"
+            api_body: "{{ lookup('template', 'new_host_physical_register_only.json.j2') }}"
+            api_register_var: "update_host_results"
+            api_method: "PUT"
+            api_status_code: "200"
+
+        - debug:
+            var: "update_host_results"
+            verbosity: "1"
+
+        - set_fact:
+            updated_host: ["{{ host_fqdn }}"]
+          when: "update_host_results.status == 200"
+      when:
+        - "host_exists"
+        - "host.force_host_update | default(False)"
+        - "host.register_only | default(False)"
+        - "host.mac is defined"
+        - "domain_id is defined"
+        - "host.compute_profile is undefined"
+        - "host.compute_resource is undefined"
+
     - name: "Build list of Created Hosts"
       set_fact:
         created_hosts: "{{ created_hosts | union(created_host) }}"
       when: "created_host | length > 0"
-  when: "not host_exists"
+
+    - name: "Build list of Updated Hosts"
+      set_fact:
+        updated_hosts: "{{ updated_hosts | union(updated_host) }}"
+      when: "updated_host | length > 0"
+  when: (not host_exists) or
+        (host_exists and host.force_host_update | default(False) and host.register_only | default(False) and not sat6_fail_on_existing)
 
 - name: "Handle existing Satellite6 hosts"
   block:
@@ -417,4 +482,20 @@
       set_fact:
         failed_hosts: "{{ failed_hosts | union(failed_host) }}"
       when: "not sat6_fail_on_existing"
-  when: "host_exists"
+  when:
+    - "host_exists"
+    - "sat6_fail_on_existing"
+    - "not host.force_host_update | default(False)"
+    - "not host.register_only | default(False)"
+
+- name: "Handle existing Satellite6 hosts"
+  block:
+    - debug:
+        msg:
+          - "{{ host_fqdn }} already exists.  Not attempting to create."
+          - "Updated {{ host_fqdn }}"
+  when:
+    - "host_exists"
+    - "host.force_host_update | default(False)"
+    - "host.register_only | default(False)"
+    - "not sat6_fail_on_existing"
