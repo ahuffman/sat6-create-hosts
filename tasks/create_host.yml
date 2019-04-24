@@ -520,9 +520,9 @@
         msg:
           - "{{ host_fqdn }} already exists.  Not attempting to create."
           - "Updated {{ host_fqdn }}"
-        when:
-          - "host.force_host_update | default(False)"
-          - "host.register_only | default(False)"
+      when:
+        - "host.force_host_update | default(False)"
+        - "host.register_only | default(False)"
   when:
     - "host_exists"
     - "not sat6_fail_on_existing"
