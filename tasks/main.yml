@@ -22,7 +22,7 @@
         name: "ahuffman.api"
       vars:
         api_task_name: "Obtain Satellite6 Organization ID"
-        api_url_path: "katello/api/organizations"
+        api_url_path: "api/v2/organizations"
         api_body: "{\"search\": \"{{ sat6_organization }}\"}"
         api_register_var: "org_qry"
 

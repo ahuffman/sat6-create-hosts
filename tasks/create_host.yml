@@ -1,6 +1,7 @@
 ---
 - name: "Clear facts"
   set_fact:
+    host_id: ""
     location_id: ""
     host_grp_id: ""
     compute_resource_id: ""
@@ -20,7 +21,7 @@
         name: "ahuffman.api"
       vars:
         api_task_name: "Obtain Satellite6 Host Group ID"
-        api_url_path: "api/hostgroups"
+        api_url_path: "api/v2/hostgroups"
         api_body: "{\"search\": \"title={{ host.host_group }}\"}"
         api_register_var: "host_grp_qry"
 
@@ -61,7 +62,7 @@
         name: "ahuffman.api"
       vars:
         api_task_name: "Check if Satellite6 host {{ host_fqdn }} exists"
-        api_url_path: "api/hosts"
+        api_url_path: "api/v2/hosts"
         api_body: "{\"search\": \"name={{ host_fqdn }}\"}"
         api_register_var: "host_qry"
 
@@ -82,6 +83,15 @@
       when:
         - "host_qry.json.results | length < 1"
 
+    - name: "Set Satellite6 Host id"
+      set_fact:
+        host_id: "{{ host_qry.json.results[0].id }}"
+      when:
+        - "not sat6_fail_on_existing"
+        - "host.force_host_update | default(False)"
+        - "host.register_only | default(False)"
+        - "host_exists"
+
     - debug:
         var: "host_exists"
         verbosity: "1"
@@ -94,7 +104,7 @@
         name: "ahuffman.api"
       vars:
         api_task_name: "Obtain Satellite6 Domain ID"
-        api_url_path: "api/domains"
+        api_url_path: "api/v2/domains"
         api_body: "{\"search\": \"name={{ host.domain }}\"}"
         api_register_var: "domain_qry"
 
@@ -119,7 +129,7 @@
         name: "ahuffman.api"
       vars:
         api_task_name: "Obtain Satellite6 Location ID"
-        api_url_path: "api/locations"
+        api_url_path: "api/v2/locations"
         api_body: "{\"search\": \"name={{ host.location }}\"}"
         api_register_var: "loc_qry"
 
@@ -146,7 +156,7 @@
         name: "ahuffman.api"
       vars:
         api_task_name: "Obtain Satellite6 Compute Resource ID"
-        api_url_path: "api/compute_resources"
+        api_url_path: "api/v2/compute_resources"
         api_body: "{\"search\": \"name={{ host.compute_resource }}\"}"
         api_register_var: "compute_resource_qry"
 
@@ -173,7 +183,7 @@
         name: "ahuffman.api"
       vars:
         api_task_name: "Obtain Satellite6 Compute Profile ID"
-        api_url_path: "api/compute_profiles"
+        api_url_path: "api/v2/compute_profiles"
         api_body: "{\"search\": \"name={{ host.compute_profile | truncate(10, True, '') }}\"}"
         api_register_var: "compute_profile_qry"
 
@@ -218,7 +228,7 @@
         name: "ahuffman.api"
       vars:
         api_task_name: "Obtain Satellite6 Subnet ID"
-        api_url_path: "api/subnets"
+        api_url_path: "api/v2/subnets"
         api_body: "{\"search\": \"name={{ host.subnet }}\"}"
         api_register_var: "subnet_qry"
 
@@ -245,7 +255,7 @@
         name: "ahuffman.api"
       vars:
         api_task_name: "Obtain Satellite6 partition table ID"
-        api_url_path: "api/ptables"
+        api_url_path: "api/v2/ptables"
         api_body: "{\"search\": \"name={{ host.partition_table }}\"}"
         api_register_var: "partition_table_qry"
 
@@ -275,7 +285,7 @@
             name: "ahuffman.api"
           vars:
             api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
-            api_url_path: "api/hosts"
+            api_url_path: "api/v2/hosts"
             api_body: "{{ lookup('template', 'new_host_virtual.json.j2') }}"
             api_register_var: "create_host_results"
             api_method: "POST"
@@ -289,7 +299,7 @@
             name: "ahuffman.api"
           vars:
             api_task_name: "Power on Satellite6 host {{ host_fqdn }}"
-            api_url_path: "api/hosts/{{ create_host_results.json.id }}/power"
+            api_url_path: "api/v2/hosts/{{ create_host_results.json.id }}/power"
             api_body: "{\"power_action\": \"start\"}"
             api_register_var: "power_result"
             api_method: "PUT"
@@ -319,7 +329,7 @@
             name: "ahuffman.api"
           vars:
             api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
-            api_url_path: "api/hosts"
+            api_url_path: "api/v2/hosts"
             api_body: "{{ lookup('template', 'new_host_virtual_register_only.json.j2') }}"
             api_register_var: "create_host_results"
             api_method: "POST"
@@ -347,7 +357,7 @@
             name: "ahuffman.api"
           vars:
             api_task_name: "Update existing Satellite 6 host {{ host_fqdn }} | Virtual"
-            api_url_path: "api/hosts"
+            api_url_path: "api/v2/hosts/{{ host_id }}"
             api_body: "{{ lookup('template', 'new_host_virtual_register_only.json.j2') }}"
             api_register_var: "update_host_results"
             api_method: "PUT"
@@ -376,7 +386,7 @@
             name: "ahuffman.api"
           vars:
             api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
-            api_url_path: "api/hosts"
+            api_url_path: "api/v2/hosts"
             api_body: "{{ lookup('template', 'new_host_physical.json.j2') }}"
             api_register_var: "create_host_results"
             api_method: "POST"
@@ -403,7 +413,7 @@
             name: "ahuffman.api"
           vars:
             api_task_name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
-            api_url_path: "api/hosts"
+            api_url_path: "api/v2/hosts"
             api_body: "{{ lookup('template', 'new_host_physical_register_only.json.j2') }}"
             api_register_var: "create_host_results"
             api_method: "POST"
@@ -430,7 +440,7 @@
             name: "ahuffman.api"
           vars:
             api_task_name: "Update existing Satellite 6 host {{ host_fqdn }} | Physical"
-            api_url_path: "api/hosts"
+            api_url_path: "api/v2/hosts/{{ host_id }}"
             api_body: "{{ lookup('template', 'new_host_physical_register_only.json.j2') }}"
             api_register_var: "update_host_results"
             api_method: "PUT"
