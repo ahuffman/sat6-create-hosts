@@ -498,7 +498,6 @@
     - "host_exists"
     - "sat6_fail_on_existing"
     - "not host.force_host_update | default(False)"
-    - "not host.register_only | default(False)"
 
 - name: "Handle existing Satellite6 hosts | No fail"
   block:
