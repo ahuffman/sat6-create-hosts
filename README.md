@@ -27,7 +27,7 @@ Fields you can utilize for either bare-metal or virtual host creation.
 |subnet|no|Name of the Satellite6 subnet to create the host with.  Not required if you wish to inherit the host group's default subnet.|string|
 |parameters|no|List of additional Satellite6 host specific parameters you would like to set on the host.  This is useful when doing post provisioning tasks and wish to use conditionals based off of these values, etc.|list of dictionaries|
 |register_only|no|Whether to only create the host entry in Satellite6 VS. actually powering it on and provisioning it  (Defaults to False).  Functionality added for other use-cases than provisioning (i.e. client registration with location specified).  If using this method of host creation, you will need to specify compute resources and profiles as they will not be queried from the Host Group.|boolean|
-|manage_host|no|When using `register_only: True` and `force_host_update: True`, will allow for the Host's build cycle to become managed by Satellite6 and Virtual Machine Power if it is utilizing a compute resource. Defaults to `False`.
+|manage_host|no|When using `register_only: True` and `force_host_update: True`, will allow for the Host's build cycle to become managed by Satellite6. Defaults to `False`.
 |force_host_update|no|When using `register_only: True` will update the Satellite6 Host to your specified options. Defaults to `False`.|boolean|
 
 
