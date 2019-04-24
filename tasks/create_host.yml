@@ -367,6 +367,7 @@
         - "host.register_only | default(False)"
         - "host.mac is undefined"
         - "domain_id is defined"
+        - "not sat6_fail_on_existing"
 
 # Bare-metal Host Creation and Updating
     - name: "Create new Satellite 6 host {{ host_fqdn }} | Physical"
@@ -450,6 +451,7 @@
         - "domain_id is defined"
         - "host.compute_profile is undefined"
         - "host.compute_resource is undefined"
+        - "not sat6_fail_on_existing"
 
     - name: "Build list of Created Hosts"
       set_fact:
