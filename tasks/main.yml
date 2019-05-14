@@ -1,103 +1,114 @@
 ---
-- name: "Ensure we have the Satellite Server's CA for validating authentication"
-  stat:
-    path: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
-  register: "ca_cert"
-
-- name: "Obtain Satellite Server's CA for validating authentication"
+- name: "Satellite6 Create Hosts"
   block:
-    - name: "Download CA Certificate"
-      get_url:
-        url: "http://{{ sat6_fqdn }}/pub/katello-server-ca.crt"
-        dest: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
+    - name: "Ensure we have the Satellite Server's CA for validating authentication"
+      stat:
+        path: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
+      register: "ca_cert"
 
-    - name: "Update CA trust"
-      command: "update-ca-trust"
-  when: "not ca_cert.stat.exists"
-  become: True
+    - name: "Obtain Satellite Server's CA for validating authentication"
+      block:
+        - name: "Download CA Certificate"
+          get_url:
+            url: "http://{{ sat6_fqdn }}/pub/katello-server-ca.crt"
+            dest: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
 
-- name: "Obtain Satellite6 Organization ID"
-  block:
-    - include_role:
-        name: "ahuffman.api"
-      vars:
-        api_task_name: "Obtain Satellite6 Organization ID"
-        api_url_path: "api/v2/organizations"
-        api_body: "{\"search\": \"{{ sat6_organization }}\"}"
-        api_register_var: "org_qry"
+        - name: "Update CA trust"
+          command: "update-ca-trust"
+      when: "not ca_cert.stat.exists"
+      become: True
 
-    - debug:
-        var: "org_qry.json.results[0]"
-        verbosity: "1"
+    - name: "Obtain Satellite6 Organization ID"
+      block:
+        - name: "Obtain Satellite6 Organization ID"
+          uri:
+            body: "{\"search\": 'name=\"{{ sat6_organization }}\"'}"
+          vars:
+            sat6_url_path: "api/v2/organizations"
+          register: "org_qry"
 
-    - name: "Set Satellite6 Organization ID"
+        - debug:
+            var: "org_qry.json.results[0]"
+            verbosity: "1"
+
+        - name: "Set Satellite6 Organization ID"
+          set_fact:
+            organization_id: "{{ org_qry.json.results[0].id }}"
+          when: "org_qry.json.results[0].name == sat6_organization"
+
+        - debug:
+            var: "organization_id"
+            verbosity: "1"
+      tags:
+        - "organization_id"
+
+    - name: "Initialize lists"
       set_fact:
-        organization_id: "{{ org_qry.json.results[0].id }}"
-      when: "org_qry.json.results[0].name == sat6_organization"
+        failed_hosts: []
+        created_hosts: []
+        updated_hosts: []
+
+    - name: "Create new Satellite 6 Hosts"
+      include_tasks: "create_host.yml"
+      with_items: "{{ sat6_hosts }}"
+      loop_control:
+        loop_var: "host"
+        label: "{{ host.name }}"
+      when: "sat6_hosts | length > 0"
+
+    # Output summary/failure messages based on several conditions
+    - debug:
+        msg: "No hosts were created."
+      when: "created_hosts | length < 1"
+
+    - name: "Playbook fail"
+      fail:
+        msg:
+          - "List of hosts to provision missing."
+          - "Variable sat6_hosts list empty."
+      when: "sat6_hosts | length < 1"
 
     - debug:
-        var: "organization_id"
-        verbosity: "1"
-  tags:
-    - "organization_id"
+        msg:
+          - "Host(s) created successfully:"
+          - "{{ created_hosts }}"
+      when: "created_hosts | length > 0"
 
-- name: "Initialize lists"
-  set_fact:
-    failed_hosts: []
-    created_hosts: []
-    updated_hosts: []
+    # when we want to fail the playbook on existing sat6 hosts
+    - name: "Playbook fail when host exists"
+      fail:
+        msg:
+          - "Host(s) already exist in Satellite6:"
+          - "{{ failed_hosts }}"
+      when:
+        - "fail_playbook | default(False)"
+        - "sat6_fail_on_existing"
 
-- name: "Create new Satellite 6 Hosts"
-  include_tasks: "create_host.yml"
-  with_items: "{{ sat6_hosts }}"
-  loop_control:
-    loop_var: "host"
-    label: "{{ host.name }}"
-  when: "sat6_hosts | length > 0"
+    # when we don't want to fail the playbook on existing sat6 hosts
+    ## Handles where we are using host.force_host_update: False
+    - debug:
+        msg:
+          - "Host(s) already exist in Satellite6:"
+          - "{{ failed_hosts }}"
+      when:
+        - "not sat6_fail_on_existing"
+        - "failed_hosts | length > 0"
 
-# Output summary/failure messages based on several conditions
-- debug:
-    msg: "No hosts were created."
-  when: "created_hosts | length < 1"
-
-- name: "Playbook fail"
-  fail:
-    msg:
-      - "List of hosts to provision missing."
-      - "Variable sat6_hosts list empty."
-  when: "sat6_hosts | length < 1"
-
-- debug:
-    msg:
-      - "Host(s) created successfully:"
-      - "{{ created_hosts }}"
-  when: "created_hosts | length > 0"
-
-# when we want to fail the playbook on existing sat6 hosts
-- name: "Playbook fail when host exists"
-  fail:
-    msg:
-      - "Host(s) already exist in Satellite6:"
-      - "{{ failed_hosts }}"
-  when:
-    - "fail_playbook | default(False)"
-    - "sat6_fail_on_existing"
-
-# when we don't want to fail the playbook on existing sat6 hosts
-## Handles where we are using host.force_host_update: False
-- debug:
-    msg:
-      - "Host(s) already exist in Satellite6:"
-      - "{{ failed_hosts }}"
-  when:
-    - "not sat6_fail_on_existing"
-    - "failed_hosts | length > 0"
-
-## Handles where we are using host.force_host_update: True
-- debug:
-    msg:
-      - "Host(s) already existed and were updated in Satellite6:"
-      - "{{ updated_hosts }}"
-  when:
-    - "not sat6_fail_on_existing"
-    - "updated_hosts | length > 0"
+    ## Handles where we are using host.force_host_update: True
+    - debug:
+        msg:
+          - "Host(s) already existed and were updated in Satellite6:"
+          - "{{ updated_hosts }}"
+      when:
+        - "not sat6_fail_on_existing"
+        - "updated_hosts | length > 0"
+  # set uri module defaults to avoid repetitive params
+  module_defaults:
+    uri:
+      user: "{{ sat6_user }}"
+      password: "{{ sat6_pass }}"
+      force_basic_auth: True
+      url: "https://{{ sat6_fqdn }}/{{ sat6_url_path | default('') }}"
+      method: "GET"
+      status_code: "200"
+      body_format: "json"
