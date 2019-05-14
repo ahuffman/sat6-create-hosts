@@ -225,7 +225,7 @@
 
     - name: "Obtain Compute Profile"
       uri:
-        body: "{\"search\": 'name=\"{{ compute_profile_name }}\", \"per_page\": \"1000\"'}"
+        body: "{\"search\": 'name=\"{{ compute_profile_name }}\"', \"per_page\": \"1000\"}"
       vars:
         sat6_url_path: "api/v2/compute_profiles"
       register: "inherit_compute_profile_qry"
