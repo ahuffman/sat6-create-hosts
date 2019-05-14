@@ -216,16 +216,24 @@
   tags:
     - "compute_profile_id"
 
-- name: "Obtain Satellite6 Compute Profile ID | Default from Host Group"
+- name: "Obtain Satellite6 Compute Profile ID and Compute Resource ID | Default from Host Group"
   block:
-    - name: "Set Satellite6 Compute Profile ID | Default from Host Group"
+    - name: "Set Satellite6 Compute Profile Name | Default from Host Group"
       set_fact:
-        compute_profile_id: "{{ host_grp_qry.json.results[0].compute_profile_id }}"
+        compute_profile_name: "{{ host_grp_qry.json.results[0].compute_profile_name }}"
       when: "host_grp_qry.json.results[0].name == host.host_group"
 
+    - name: "Obtain Compute Profile"
+      uri:
+        body: "{\"search\": 'name=\"{{ compute_profile_name }}\", \"per_page\": \"1000\"'}"
+      vars:
+        sat6_url_path: "api/v2/compute_profiles"
+      register: "inherit_compute_profile_qry"
+
     - debug:
-        var: "compute_profile_id.json.results[0]"
-        verbosity: "1"
+        var: "inherit_compute_profile_qry.json.results[0]"
+
+    #setfacts
   when:
     - "not host_exists"
     - "host.compute_profile is undefined"
