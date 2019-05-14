@@ -221,7 +221,7 @@
     - name: "Set Satellite6 Compute Profile Name | Default from Host Group"
       set_fact:
         compute_profile_name: "{{ host_grp_qry.json.results[0].compute_profile_name }}"
-      when: "host_grp_qry.json.results[0].name == host.host_group"
+      when: "host_grp_qry.json.results[0].title == host.host_group"
 
     - name: "Obtain Compute Profile"
       uri:
