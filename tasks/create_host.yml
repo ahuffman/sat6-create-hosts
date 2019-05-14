@@ -312,6 +312,10 @@
             var: "create_host_results"
             verbosity: "1"
 
+        - name: "Wait for host creation to complete"
+          pause:
+            seconds: "{{ sat6_power_on_delay }}"
+
         - name: "Power on Satellite6 host {{ host_fqdn }}"
           uri:
             body: "{\"power_action\": \"start\"}"
