@@ -10,6 +10,7 @@ An Ansible role to create new virtual and bare-metal hosts in Satellite 6.x. v2 
 |sat6_pass|yes|Password of the Satellite 6 user that has access to create new hosts. This should be vaulted to ensure security.|string|""|
 |sat6_organization|yes|Satellite6 organization to create the hosts defined in `sat6_hosts`.|string|""|
 |sat6_fail_on_existing|no|To fail the playbook if any of the hosts defined in `sat6_hosts` already exist in Satellite6.  Useful when using notifications in Ansible Tower, and you want to be notified on a failure. True means fail if a host exists, False means just output a summary instead and allows for a more idempotent style run. (i.e. you can run the playbook over and over again and it will only create hosts that don't exist)|boolean|False|
+|sat6_power_on_delay|no|Seconds to delay between creating a new virtual machine via a compute resource and powering it on (to prevent possible race conditions as the VM is being created in the external system) | integer | 30 |
 |sat6_hosts|yes|Satellite 6 hosts you would like to create|list of dictionaries|[]|
 
 ## `sat6_hosts` Dictionary Fields - Common
