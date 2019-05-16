@@ -320,7 +320,7 @@
 
         - name: "Wait for host creation to complete"
           pause:
-            seconds: "{{ sat6_power_on_delay }}"
+            seconds: "{{ sat6_power_on_delay | default('30') }}"
 
         - name: "Power on Satellite6 host {{ host_fqdn }}"
           uri:
