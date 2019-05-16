@@ -5,6 +5,7 @@ sat6_user: ""
 sat6_pass: ""
 sat6_organization: ""
 sat6_fail_on_existing: False
+sat6_power_on_delay: "30"
 
 #Example provision on compute resource:
 # sat6_hosts:
