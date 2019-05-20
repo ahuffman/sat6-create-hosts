@@ -137,7 +137,7 @@
   block:
     - name: "Obtain Satellite6 Location ID"
       uri:
-        body: "{\"search\": 'name=\"{{ host.location }}\"'}"
+        body: "{\"search\": 'name=\"{{ host.location | string }}\"'}"
       vars:
         sat6_url_path: "api/v2/locations"
       register: "loc_qry"
@@ -149,7 +149,7 @@
     - name: "Set Satellite6 Location ID"
       set_fact:
         location_id: "{{ loc_qry.json.results[0].id }}"
-      when: "loc_qry.json.results[0].name == host.location"
+      when: "loc_qry.json.results[0].name == host.location | string"
 
     - debug:
         var: "location_id"
