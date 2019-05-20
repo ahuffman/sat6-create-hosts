@@ -137,7 +137,7 @@
   block:
     - name: "Obtain Satellite6 Location ID"
       uri:
-        body: "{\"search\": 'name=\"{{ host.location | urlencode }}\"'}"
+        body: "{\"search\": 'name=\"{{ host.location }}\"'}"
       vars:
         sat6_url_path: "api/v2/locations"
       register: "loc_qry"
