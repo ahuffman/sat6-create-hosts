@@ -30,7 +30,7 @@
   "compute_resource_id": "{{ compute_resource_id }}",
   "compute_profile_id": "{{ compute_profile_id }}",
   "build": "true",
-  "provision_method": "{{ provision_method | default('build') }}",
+  "provision_method": "{{ host.provision_method | default('build') }}",
   "managed": "true",
   "enabled": "true",
   "compute_attributes": {
