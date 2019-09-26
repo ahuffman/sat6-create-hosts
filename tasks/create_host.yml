@@ -305,10 +305,6 @@
   block:
     - name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
       block:
-        - name: ERIC - display REST body
-          debug:
-            msg: "{{ lookup('template', 'new_host_virtual.json.j2') }}"
-            
         - name: "Create new Satellite 6 host {{ host_fqdn }} | Virtual"
           uri:
             method: "POST"
