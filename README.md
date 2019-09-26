@@ -1,3 +1,11 @@
+# Note:  Forked from ahuffman.sat6-create-hosts
+Following changes were made:
+
+- Added "provision_method" option to allow image build
+- Added timeout: 180 to uri call to Satellite server
+
+Eric Chong
+
 # ahuffman.sat6_create_hosts
 An Ansible role to create new virtual and bare-metal hosts in Satellite 6.x. v2 of Satellite6 API is required.
 
