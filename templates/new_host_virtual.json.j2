@@ -30,8 +30,19 @@
   "compute_resource_id": "{{ compute_resource_id }}",
   "compute_profile_id": "{{ compute_profile_id }}",
   "build": "true",
-  "provision_method": "build",
+  "provision_method": "{{ host.provision_method | default('build') }}",
   "managed": "true",
-  "enabled": "true"
+  "enabled": "true",
+  "compute_attributes": {
+    "start": "1"
+  },
+  "interfaces_attributes": [{
+      "ip": "{{ host.ipv4 }}",
+      "identifier": "eth0",
+      "type": "interface",
+      "managed": "true",
+      "domain_id": "{{ domain_id }}",
+      "subnet_id": "{{ subnet_id }}"
+  }]
   }
 }

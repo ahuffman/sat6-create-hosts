@@ -194,7 +194,7 @@
   block:
     - name: "Obtain Satellite6 Compute Profile ID"
       uri:
-        body: "{\"search\": 'name=\"{{ host.compute_profile | truncate(10, True, '') }}\"'}"
+        body: "{\"search\": 'name=\"{{ host.compute_profile | truncate(20, True, '') }}\"'}"
       vars:
         sat6_url_path: "api/v2/compute_profiles"
       register: "compute_profile_qry"
@@ -310,6 +310,7 @@
             method: "POST"
             body: "{{ lookup('template', 'new_host_virtual.json.j2') }}"
             status_code: "201"
+            timeout: 180
           vars:
             sat6_url_path: "api/v2/hosts"
           register: "create_host_results"

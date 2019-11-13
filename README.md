@@ -30,6 +30,7 @@ Fields you can utilize for either bare-metal or virtual host creation.
 |register_only|no|Whether to only create the host entry in Satellite6 VS. actually powering it on and provisioning it  (Defaults to False).  Functionality added for other use-cases than provisioning (i.e. client registration with location specified).  If using this method of host creation, you will need to specify compute resources and profiles as they will not be queried from the Host Group.|boolean|
 |manage_host|no|When using `register_only: True` and `force_host_update: True`, will allow for the Host's build cycle to become managed by Satellite6. Defaults to `False`.
 |force_host_update|no|When using `register_only: True` will update the Satellite6 Host to your specified options. Defaults to `False`.|boolean|
+|provision_method|no|`build` or `image` deploy. Defaults to `build` |string
 
 
 ## `sat6_hosts` Dictionary Fields - Virtual
