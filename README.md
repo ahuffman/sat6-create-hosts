@@ -1,3 +1,5 @@
+![Ansible Role](https://img.shields.io/ansible/role/d/28011)
+
 # ahuffman.sat6_create_hosts
 An Ansible role to create new virtual and bare-metal hosts in Satellite 6.x. v2 of Satellite6 API is required.
 
